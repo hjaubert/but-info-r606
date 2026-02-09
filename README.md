@@ -71,22 +71,17 @@ git commit -m "Réusinage : correction du code smell <nom du smell>"
 
 ### 5. Soumettre votre travail
 
-Une fois toutes vos corrections terminées, poussez votre branche et créez une **Merge Request** vers le projet d'origine :
+Une fois toutes vos corrections terminées, créez une archive zip du répertoire `.git` et déposez-la sur **ecampus** :
 
 ```bash
-git push origin main
+zip -r git_directory.zip .git
 ```
 
-Puis depuis GitLab, créez une **Merge Request** de votre fork vers le projet d'origine.
-
-Dans la description de votre Merge Request, listez :
-- Les code smells que vous avez identifiés
-- Le fichier et la ligne où vous les avez trouvés
-- Le réusinage que vous avez appliqué
+Déposez le fichier `git_directory.zip` sur ecampus dans l'espace de dépôt prévu.
 
 ## Critères d'évaluation
 
 - Identification correcte des 15 code smells
 - Qualité des réusinages appliqués
 - Le code fonctionne toujours après les corrections
-- Clarté des messages de commit et de la description de la Merge Request
+- Clarté des messages de commit
