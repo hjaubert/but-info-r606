@@ -40,7 +40,7 @@ Vous devez identifier et corriger les **15 code smells** suivants, présents au 
 Clonez le dépôt du projet :
 
 ```bash
-git clone https://git.unicaen.fr/nkarageuzian/but-info-r606.git
+git clone https://git.unicaen.fr/karageu251/but-info-r606.git
 cd but-info-r606
 ```
 
