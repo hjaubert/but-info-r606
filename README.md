@@ -35,15 +35,20 @@ Vous devez identifier et corriger les **15 code smells** suivants, présents au 
 
 ## Instructions
 
-### 1. Forker le projet
+### 1. Récupérer le projet
 
-Depuis GitLab, cliquez sur **Fork** pour créer une copie du projet dans votre espace personnel.
-
-### 2. Cloner votre fork
+Clonez le dépôt du projet :
 
 ```bash
-git clone https://git.unicaen.fr/<votre-login>/but-info-r606.git
+git clone https://git.unicaen.fr/nkarageuzian/but-info-r606.git
 cd but-info-r606
+```
+
+Pour conserver votre historique entre vos postes de travail, vous pouvez créer un projet **privé** sur GitLab et y pousser votre copie :
+
+```bash
+git remote set-url origin https://git.unicaen.fr/<votre-login>/but-info-r606.git
+git push -u origin main
 ```
 
 ### 3. Lancer l'application
