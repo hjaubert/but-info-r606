@@ -24,48 +24,6 @@ class Employee:
         self.type_contrat = type_contrat    # "CDI", "CDD", "Stage", "Alternance"
         self.taux_horaire = taux_horaire    # 35.0
 
-    def get_nom(self):
-        return self.nom
-
-    def set_nom(self, nom):
-        self.nom = nom
-
-    def get_prenom(self):
-        return self.prenom
-
-    def set_prenom(self, prenom):
-        self.prenom = prenom
-
-    def get_telephone(self):
-        return self.telephone
-
-    def set_telephone(self, telephone):
-        self.telephone = telephone
-
-    def get_email(self):
-        return self.email
-
-    def set_email(self, email):
-        self.email = email
-
-    def get_date_embauche(self):
-        return self.date_embauche
-
-    def set_date_embauche(self, date_embauche):
-        self.date_embauche = date_embauche
-
-    def get_type_contrat(self):
-        return self.type_contrat
-
-    def set_type_contrat(self, type_contrat):
-        self.type_contrat = type_contrat
-
-    def get_taux_horaire(self):
-        return self.taux_horaire
-
-    def set_taux_horaire(self, taux_horaire):
-        self.taux_horaire = taux_horaire
-
 
 class TimeEntry:
     """Une entree de temps saisie par un employe"""

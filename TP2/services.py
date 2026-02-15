@@ -77,7 +77,7 @@ class TimesheetService:
 
         # Construire le rapport
         rapport = f"=== Rapport mensuel {mois:02d}/{annee} ===\n"
-        rapport += f"Employe: {employe.get_nom()} {employe.get_prenom()}\n"
+        rapport += f"Employe: {employe.nom} {employe.prenom}\n"
         rapport += f"Contrat: {employe.type_contrat}\n"
         rapport += f"Taux horaire: {employe.taux_horaire:.2f} EUR\n"
         rapport += "-" * 40 + "\n"
@@ -224,7 +224,7 @@ class TimesheetService:
         """Envoie une notification a un employe"""
         emp = self._trouver_employe(employee_id)
         if emp:
-            notification = f"[{emp.get_nom()}] {message}"
+            notification = f"[{emp.nom}] {message}"
             self.notifications.append(notification)
             print(notification)
 

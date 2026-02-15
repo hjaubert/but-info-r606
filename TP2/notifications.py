@@ -42,7 +42,7 @@ class ApprobationWorkflow:
     def soumettre(self, entree):
         """Soumet une entree de temps pour approbation"""
         entree.statut = "soumis"
-        emp_nom = self.timesheet_service._trouver_employe(entree.employee_id).get_nom()
+        emp_nom = self.timesheet_service._trouver_employe(entree.employee_id).nom
         projet_nom = self.timesheet_service._trouver_projet(entree.project_id).nom
         self.notification_service.notifier_soumission(
             emp_nom, "Manager", projet_nom, entree.heures, entree.date, entree.date
@@ -51,7 +51,7 @@ class ApprobationWorkflow:
     def approuver(self, entree, manager_nom):
         """Approuve une entree de temps"""
         entree.statut = "approuve"
-        emp_nom = self.timesheet_service._trouver_employe(entree.employee_id).get_nom()
+        emp_nom = self.timesheet_service._trouver_employe(entree.employee_id).nom
         projet_nom = self.timesheet_service._trouver_projet(entree.project_id).nom
         self.notification_service.notifier_approbation(
             emp_nom, manager_nom, projet_nom, entree.heures, entree.date, entree.date
@@ -60,7 +60,7 @@ class ApprobationWorkflow:
     def rejeter(self, entree, manager_nom, raison):
         """Rejette une entree de temps"""
         entree.statut = "rejete"
-        emp_nom = self.timesheet_service._trouver_employe(entree.employee_id).get_nom()
+        emp_nom = self.timesheet_service._trouver_employe(entree.employee_id).nom
         projet_nom = self.timesheet_service._trouver_projet(entree.project_id).nom
         self.notification_service.notifier_rejet(
             emp_nom, manager_nom, projet_nom, entree.heures, entree.date, entree.date, raison

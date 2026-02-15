@@ -44,7 +44,7 @@ def main():
 
     # Utilisation du service de rapports
     rapport_service = RapportService(ts)
-    nom = rapport_service.timesheet_service._trouver_employe(1).get_nom()
+    nom = rapport_service.timesheet_service._trouver_employe(1).nom
     print(f"\nRapport via RapportService pour: {nom}")
     print(f"Heures totales: {rapport_service.heures_employe(1, 3, 2024):.1f}h")
     print(f"Cout projet WEB01: {rapport_service.cout_projet(1, 3, 2024):.2f} EUR")
