@@ -4,7 +4,7 @@ from models import Employee, Projet, TimeEntry, EmployeManager, Activite
 from services import TimesheetService
 from reports import RapportService, FormateurRapport
 from notifications import NotificationService, ApprobationWorkflow
-from utils import DateHelper
+from utils import aujourd_hui
 
 
 def main():
