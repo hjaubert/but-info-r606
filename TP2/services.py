@@ -18,12 +18,11 @@ class TimesheetService:
         self.config_separateur_csv = ";"
         self.config_devise = "EUR"
 
-    def ajouter_employe(self, id, nom, prenom, telephone, email, date_embauche, type_contrat, taux_horaire):
+    def ajouter_employe(self, employe):
         """Ajoute un employe au systeme"""
-        emp = Employee(id, nom, prenom, telephone, email, date_embauche, type_contrat, taux_horaire)
-        self.employees.append(emp)
-        self.log.append(f"Employe ajoute: {nom} {prenom}")
-        return emp
+        self.employees.append(employe)
+        self.log.append(f"Employe ajoute: {employe.nom} {employe.prenom}")
+        return employe
 
     def ajouter_projet(self, id, nom, code, budget_heures):
         """Ajoute un projet au systeme"""
