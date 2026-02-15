@@ -1,5 +1,21 @@
 # models.py - Classes metier de l'application de feuilles de temps
 
+from enum import Enum
+
+
+class TypeContrat(Enum):
+    CDI = "CDI"
+    CDD = "CDD"
+    STAGE = "Stage"
+    ALTERNANCE = "Alternance"
+    FREELANCE = "Freelance"
+
+
+class StatutEntree(Enum):
+    BROUILLON = "brouillon"
+    SOUMIS = "soumis"
+    APPROUVE = "approuve"
+    REJETE = "rejete"
 
 class Projet:
     """Un projet sur lequel les employes peuvent saisir du temps"""
@@ -45,7 +61,7 @@ class EmployeManager(Employee):
         self.equipe = equipe
 
     def approuver_entree(self, entree):
-        entree.statut = "approuve"
+        entree.statut = StatutEntree.APPROUVE
 
     def rejeter_entree(self, entree, raison):
-        entree.statut = "rejete"
+        entree.statut = StatutEntree.REJETE

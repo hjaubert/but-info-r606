@@ -1,6 +1,6 @@
 # services.py - Service principal de gestion des feuilles de temps
 
-from models import Employee, TimeEntry, Projet
+from models import Employee, TimeEntry, Projet, TypeContrat, StatutEntree
 
 
 class TimesheetService:
@@ -34,7 +34,7 @@ class TimesheetService:
 
     def saisir_entree(self, employee_id, project_id, date, heures, description):
         """Saisit une entree de temps"""
-        entree = TimeEntry(employee_id, project_id, date, heures, description, "brouillon")
+        entree = TimeEntry(employee_id, project_id, date, heures, description, StatutEntree.BROUILLON)
         self.entrees.append(entree)
         return entree
 
@@ -77,7 +77,7 @@ class TimesheetService:
         # Construire le rapport
         rapport = f"=== Rapport mensuel {mois:02d}/{annee} ===\n"
         rapport += f"Employe: {employe.nom} {employe.prenom}\n"
-        rapport += f"Contrat: {employe.type_contrat}\n"
+        rapport += f"Contrat: {employe.type_contrat.value}\n"
         rapport += f"Taux horaire: {employe.taux_horaire:.2f} EUR\n"
         rapport += "-" * 40 + "\n"
 
@@ -95,13 +95,13 @@ class TimesheetService:
         rapport += f"Total: {total_heures:.1f}h - {cout_total:.2f} EUR\n"
 
         # Verifier les depassements
-        if employe.type_contrat == "CDI":
+        if employe.type_contrat == TypeContrat.CDI:
             if total_heures > 151.67:
                 rapport += "ATTENTION: Depassement du forfait mensuel!\n"
-        elif employe.type_contrat == "CDD":
+        elif employe.type_contrat == TypeContrat.CDD:
             if total_heures > 140:
                 rapport += "ATTENTION: Depassement du forfait mensuel!\n"
-        elif employe.type_contrat == "Stage":
+        elif employe.type_contrat == TypeContrat.STAGE:
             if total_heures > 120:
                 rapport += "ATTENTION: Depassement du forfait mensuel!\n"
 
@@ -146,21 +146,21 @@ class TimesheetService:
             return erreurs
 
         # Verification des heures maximales selon le type de contrat
-        if emp.type_contrat == "CDI":
+        if emp.type_contrat == TypeContrat.CDI:
             max_heures = 8.0
-        elif emp.type_contrat == "CDD":
+        elif emp.type_contrat == TypeContrat.CDD:
             max_heures = 7.5
-        elif emp.type_contrat == "Stage":
+        elif emp.type_contrat == TypeContrat.STAGE:
             max_heures = 6.0
-        elif emp.type_contrat == "Alternance":
+        elif emp.type_contrat == TypeContrat.ALTERNANCE:
             max_heures = 7.0
-        elif emp.type_contrat == "Freelance":
+        elif emp.type_contrat == TypeContrat.FREELANCE:
             max_heures = 10.0
         else:
             max_heures = 8.0
 
         if heures > max_heures:
-            erreurs.append(f"Depassement: {heures}h > {max_heures}h max pour {emp.type_contrat}")
+            erreurs.append(f"Depassement: {heures}h > {max_heures}h max pour {emp.type_contrat.value}")
 
         if heures <= 0:
             erreurs.append("Les heures doivent etre positives")

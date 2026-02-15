@@ -1,6 +1,6 @@
 # main.py - Point d'entree de l'application de feuilles de temps
 
-from models import Employee, Projet, TimeEntry, EmployeManager
+from models import Employee, Projet, TimeEntry, EmployeManager, TypeContrat
 from services import TimesheetService
 from reports import RapportService, FormateurRapport
 from notifications import NotificationService, ApprobationWorkflow
@@ -12,9 +12,9 @@ def main():
     ts = TimesheetService()
 
     # Ajouter des employes
-    ts.ajouter_employe(1, "Dupont", "Marie", "0612345678", "marie@example.com", "15/01/2023", "CDI", 35.0)
-    ts.ajouter_employe(2, "Martin", "Pierre", "0698765432", "pierre@example.com", "01/06/2022", "CDD", 28.0)
-    ts.ajouter_employe(3, "Durand", "Sophie", "0655443322", "sophie@example.com", "01/09/2023", "Stage", 15.0)
+    ts.ajouter_employe(1, "Dupont", "Marie", "0612345678", "marie@example.com", "15/01/2023", TypeContrat.CDI, 35.0)
+    ts.ajouter_employe(2, "Martin", "Pierre", "0698765432", "pierre@example.com", "01/06/2022", TypeContrat.CDD, 28.0)
+    ts.ajouter_employe(3, "Durand", "Sophie", "0655443322", "sophie@example.com", "01/09/2023", TypeContrat.STAGE, 15.0)
 
     # Ajouter des projets
     ts.ajouter_projet(1, "Site Web Corporate", "WEB01", 500)
