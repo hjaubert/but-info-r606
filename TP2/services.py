@@ -12,7 +12,6 @@ class TimesheetService:
         self.employees = []
         self.projets = []
         self.entrees = []
-        self.activites = []
         self.notifications = []
         self.log = []
         self.config_format_date = "FR"

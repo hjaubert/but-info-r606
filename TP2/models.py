@@ -56,15 +56,3 @@ class EmployeManager(Projet):
 
     def rejeter_entree(self, entree, raison):
         entree.statut = "rejete"
-
-
-class Activite:
-    """Enregistre une activite d'un employe sur un projet.
-    Ecrit par un autre developpeur."""
-
-    def __init__(self, id_employe, id_projet, jour, nb_heures, commentaire):
-        self.id_employe = id_employe
-        self.id_projet = id_projet
-        self.jour = jour                # "15/03/2024"
-        self.nb_heures = nb_heures      # 8.0
-        self.commentaire = commentaire
