@@ -33,31 +33,3 @@ class FormateurRapport:
     def formater_total(self, total_heures, taux):
         """Formate la ligne de total"""
         return f"TOTAL: {total_heures:.1f}h - {total_heures * taux:.2f} EUR"
-
-
-class StatistiquesCalculateur:
-    """Calcule des statistiques sur les feuilles de temps"""
-
-    def calculer_moyenne(self, heures_list):
-        """Calcule la moyenne des heures"""
-        total = 0
-        for h in heures_list:
-            total += h
-        return total / len(heures_list) if len(heures_list) > 0 else 0
-
-    def calculer_total(self, heures_list):
-        """Calcule le total des heures"""
-        total = 0
-        for h in heures_list:
-            total += h
-        return total
-
-    def calculer_max(self, heures_list):
-        """Trouve le maximum des heures"""
-        if not heures_list:
-            return 0
-        maximum = heures_list[0]
-        for h in heures_list:
-            if h > maximum:
-                maximum = h
-        return maximum
