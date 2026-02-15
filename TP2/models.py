@@ -37,18 +37,11 @@ class TimeEntry:
         self.statut = statut            # "brouillon", "soumis", "approuve", "rejete"
 
 
-class EmployeManager(Projet):
-    """Un manager qui peut approuver les feuilles de temps.
-    Herite de Projet car les deux ont un id et un nom..."""
+class EmployeManager(Employee):
+    """Un manager qui peut approuver les feuilles de temps."""
 
     def __init__(self, id, nom, prenom, telephone, email, date_embauche, type_contrat, taux_horaire, equipe):
-        super().__init__(id, nom, nom, 0)
-        self.prenom = prenom
-        self.telephone = telephone
-        self.email = email
-        self.date_embauche = date_embauche
-        self.type_contrat = type_contrat
-        self.taux_horaire = taux_horaire
+        super().__init__(id, nom, prenom, telephone, email, date_embauche, type_contrat, taux_horaire)
         self.equipe = equipe
 
     def approuver_entree(self, entree):
