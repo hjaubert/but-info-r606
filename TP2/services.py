@@ -156,18 +156,15 @@ class TimesheetService:
         return erreurs
 
     def verifier_heures_max(self, emp):
-        if emp.type_contrat == TypeContrat.CDI:
-            return 8.0
-        elif emp.type_contrat == TypeContrat.CDD:
-            return 7.5
-        elif emp.type_contrat == TypeContrat.STAGE:
-            return 6.0
-        elif emp.type_contrat == TypeContrat.ALTERNANCE:
-            return 7.0
-        elif emp.type_contrat == TypeContrat.FREELANCE:
-            return 10.0
-        else:
-            return 8.0
+        max_heures_par_contrat = {
+            TypeContrat.CDI: 8.0,
+            TypeContrat.CDD: 7.5,
+            TypeContrat.STAGE: 6.0,
+            TypeContrat.ALTERNANCE: 7.0,
+            TypeContrat.FREELANCE: 10.0,
+        }
+        max_heures = max_heures_par_contrat.get(emp.type_contrat, 8.0)
+        return max_heures
 
     def valider_date(self, date, erreurs):
         if self.config_format_date == "FR":
