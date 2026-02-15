@@ -39,17 +39,40 @@ class TimesheetService:
 
     def generer_rapport_mensuel(self, employee_id, mois, annee):
         """Genere un rapport mensuel pour un employe"""
-        # Trouver l'employe
-        employe = None
-        for emp in self.employees:
-            if emp.id == employee_id:
-                employe = emp
-                break
-
+        employe = self._trouver_employe(employee_id)
         if employe is None:
             return "Employe non trouve"
 
-        # Filtrer les entrees du mois
+        entrees_mois = self._filtrer_entrees_mois(employee_id, mois, annee)
+        heures_par_projet = self._calculer_heures_par_projet(entrees_mois)
+        total_heures = sum(heures_par_projet.values())
+        cout_total = total_heures * employe.taux_horaire
+
+        rapport = self.construire_rapport(employe, mois, annee)
+
+        for projet_id, heures in heures_par_projet.items():
+            projet = self._trouver_projet(projet_id)
+            projet_nom = projet.nom if projet else "Inconnu"
+            cout = heures * employe.taux_horaire
+            rapport += f"  {projet_nom}: {heures:.1f}h - {cout:.2f} EUR\n"
+
+        rapport += "-" * 40 + "\n"
+        rapport += f"Total: {total_heures:.1f}h - {cout_total:.2f} EUR\n"
+        rapport += self._verifier_depassement(employe, total_heures)
+
+        return rapport
+
+    def construire_rapport(self, employe, mois, annee):
+        """Construit un rapport mensuel pour un employe"""
+        rapport = f"=== Rapport mensuel {mois:02d}/{annee} ===\n"
+        rapport += f"Employe: {employe.nom} {employe.prenom}\n"
+        rapport += f"Contrat: {employe.type_contrat.value}\n"
+        rapport += f"Taux horaire: {employe.taux_horaire:.2f} EUR\n"
+        rapport += "-" * 40 + "\n"
+        return rapport
+
+    def _filtrer_entrees_mois(self, employee_id, mois, annee):
+        """Filtre les entrees de temps pour un employe sur un mois donne"""
         entrees_mois = []
         for entree in self.entrees:
             parties = entree.date.split("/")
@@ -57,54 +80,28 @@ class TimesheetService:
             entry_annee = int(parties[2])
             if entree.employee_id == employee_id and entry_mois == mois and entry_annee == annee:
                 entrees_mois.append(entree)
+        return entrees_mois
 
-        # Calculer les heures par projet
+    def _calculer_heures_par_projet(self, entrees):
+        """Calcule les heures regroupees par projet"""
         heures_par_projet = {}
-        for entree in entrees_mois:
+        for entree in entrees:
             if entree.project_id not in heures_par_projet:
                 heures_par_projet[entree.project_id] = 0
             heures_par_projet[entree.project_id] += entree.heures
+        return heures_par_projet
 
-        # Calculer le total des heures
-        total_heures = 0
-        for projet_id, heures in heures_par_projet.items():
-            total_heures += heures
-
-        # Calculer le cout total
-        cout_total = total_heures * employe.taux_horaire
-
-        # Construire le rapport
-        rapport = f"=== Rapport mensuel {mois:02d}/{annee} ===\n"
-        rapport += f"Employe: {employe.nom} {employe.prenom}\n"
-        rapport += f"Contrat: {employe.type_contrat.value}\n"
-        rapport += f"Taux horaire: {employe.taux_horaire:.2f} EUR\n"
-        rapport += "-" * 40 + "\n"
-
-        # Detail par projet
-        for projet_id, heures in heures_par_projet.items():
-            projet_nom = "Inconnu"
-            for p in self.projets:
-                if p.id == projet_id:
-                    projet_nom = p.nom
-                    break
-            cout = heures * employe.taux_horaire
-            rapport += f"  {projet_nom}: {heures:.1f}h - {cout:.2f} EUR\n"
-
-        rapport += "-" * 40 + "\n"
-        rapport += f"Total: {total_heures:.1f}h - {cout_total:.2f} EUR\n"
-
-        # Verifier les depassements
-        if employe.type_contrat == TypeContrat.CDI:
-            if total_heures > 151.67:
-                rapport += "ATTENTION: Depassement du forfait mensuel!\n"
-        elif employe.type_contrat == TypeContrat.CDD:
-            if total_heures > 140:
-                rapport += "ATTENTION: Depassement du forfait mensuel!\n"
-        elif employe.type_contrat == TypeContrat.STAGE:
-            if total_heures > 120:
-                rapport += "ATTENTION: Depassement du forfait mensuel!\n"
-
-        return rapport
+    def _verifier_depassement(self, employe, total_heures):
+        """Verifie si les heures depassent le forfait mensuel"""
+        seuils = {
+            TypeContrat.CDI: 151.67,
+            TypeContrat.CDD: 140,
+            TypeContrat.STAGE: 120,
+        }
+        seuil = seuils.get(employe.type_contrat)
+        if seuil and total_heures > seuil:
+            return "ATTENTION: Depassement du forfait mensuel!\n"
+        return ""
 
     def calculer_heures_employe(self, employee_id, mois, annee):
         """Calcule le total des heures pour un employe sur un mois"""
@@ -144,19 +141,7 @@ class TimesheetService:
             erreurs.append("Projet inexistant")
             return erreurs
 
-        # Verification des heures maximales selon le type de contrat
-        if emp.type_contrat == TypeContrat.CDI:
-            max_heures = 8.0
-        elif emp.type_contrat == TypeContrat.CDD:
-            max_heures = 7.5
-        elif emp.type_contrat == TypeContrat.STAGE:
-            max_heures = 6.0
-        elif emp.type_contrat == TypeContrat.ALTERNANCE:
-            max_heures = 7.0
-        elif emp.type_contrat == TypeContrat.FREELANCE:
-            max_heures = 10.0
-        else:
-            max_heures = 8.0
+        max_heures = self.verifier_heures_max(emp)
 
         if heures > max_heures:
             erreurs.append(f"Depassement: {heures}h > {max_heures}h max pour {emp.type_contrat.value}")
@@ -164,7 +149,25 @@ class TimesheetService:
         if heures <= 0:
             erreurs.append("Les heures doivent etre positives")
 
-        # Validation du format de date
+        erreurs = self.valider_date(date, erreurs)
+
+        return erreurs
+
+    def verifier_heures_max(self, emp):
+        if emp.type_contrat == TypeContrat.CDI:
+            return 8.0
+        elif emp.type_contrat == TypeContrat.CDD:
+            return 7.5
+        elif emp.type_contrat == TypeContrat.STAGE:
+            return 6.0
+        elif emp.type_contrat == TypeContrat.ALTERNANCE:
+            return 7.0
+        elif emp.type_contrat == TypeContrat.FREELANCE:
+            return 10.0
+        else:
+            return 8.0
+
+    def valider_date(self, date, erreurs):
         if self.config_format_date == "FR":
             parties = date.split("/")
             if len(parties) != 3:
@@ -177,7 +180,7 @@ class TimesheetService:
             parties = date.split("-")
             if len(parties) != 3:
                 erreurs.append("Format de date invalide (attendu: AAAA-MM-JJ)")
-
+        
         return erreurs
 
     def formater_date(self, date_str):
