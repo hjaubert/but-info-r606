@@ -105,27 +105,29 @@ class TimesheetService:
 
     def calculer_heures_employe(self, employee_id, mois, annee):
         """Calcule le total des heures pour un employe sur un mois"""
-        total = 0
-        for entree in self.entrees:
-            parties = entree.date.split("/")
-            entry_mois = int(parties[1])
-            entry_annee = int(parties[2])
-            if entree.employee_id == employee_id and entry_mois == mois and entry_annee == annee:
-                total += entree.heures
-        return total
+        entrees = self._filtrer_entrees_mois(employee_id, mois, annee)
+        return sum(e.heures for e in entrees)
 
     def calculer_cout_projet(self, project_id, mois, annee):
         """Calcule le cout d'un projet sur un mois"""
         total_cout = 0
+        entrees = self._filtrer_entrees_par_projet(project_id, mois, annee)
+        for entree in entrees:
+            emp = self._trouver_employe(entree.employee_id)
+            if emp:
+                total_cout += entree.heures * emp.taux_horaire
+        return total_cout
+
+    def _filtrer_entrees_par_projet(self, project_id, mois, annee):
+        """Filtre les entrees de temps pour un projet sur un mois donne"""
+        entrees_mois = []    
         for entree in self.entrees:
             parties = entree.date.split("/")
             entry_mois = int(parties[1])
             entry_annee = int(parties[2])
             if entree.project_id == project_id and entry_mois == mois and entry_annee == annee:
-                emp = self._trouver_employe(entree.employee_id)
-                if emp:
-                    total_cout += entree.heures * emp.taux_horaire
-        return total_cout
+                entrees_mois.append(entree)
+        return entrees_mois
 
     def valider_entree(self, employee_id, project_id, date, heures, description):
         """Valide une entree de temps avant saisie"""
@@ -204,20 +206,14 @@ class TimesheetService:
         sep = self.config_separateur_csv
         lignes = [f"Date{sep}Projet{sep}Heures{sep}Description{sep}Cout (EUR)"]
 
-        for entree in self.entrees:
-            parties = entree.date.split("/")
-            entry_mois = int(parties[1])
-            entry_annee = int(parties[2])
-            if entree.employee_id == employee_id and entry_mois == mois and entry_annee == annee:
-                projet_nom = "Inconnu"
-                for p in self.projets:
-                    if p.id == entree.project_id:
-                        projet_nom = p.nom
-                        break
-                emp = self._trouver_employe(employee_id)
-                cout = entree.heures * emp.taux_horaire
-                date_formatee = self.formater_date(entree.date)
-                lignes.append(f"{date_formatee}{sep}{projet_nom}{sep}{entree.heures}{sep}{entree.description}{sep}{cout:.2f} EUR")
+        entrees = self._filtrer_entrees_mois(employee_id, mois, annee)
+        for entree in entrees:
+            projet = self._trouver_projet(entree.project_id)
+            projet_nom = projet.nom if projet else "Inconnu"
+            emp = self._trouver_employe(employee_id)
+            cout = entree.heures * emp.taux_horaire
+            date_formatee = self.formater_date(entree.date)
+            lignes.append(f"{date_formatee}{sep}{projet_nom}{sep}{entree.heures}{sep}{entree.description}{sep}{cout:.2f} EUR")
 
         return "\n".join(lignes)
 
