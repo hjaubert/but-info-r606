@@ -14,9 +14,9 @@ class TimesheetService:
         self.entrees = []
         self.notifications = []
         self.log = []
-        self.config_format_date = "FR"
         self.config_separateur_csv = ";"
         self.config_devise = "EUR"
+        self.validation_service = ValidationService()
 
     def ajouter_employe(self, employe):
         """Ajoute un employe au systeme"""
@@ -130,73 +130,16 @@ class TimesheetService:
         return entrees_mois
 
     def valider_entree(self, employee_id, project_id, date, heures, description):
-        """Valide une entree de temps avant saisie"""
-        erreurs = []
-
-        emp = self._trouver_employe(employee_id)
-        if emp is None:
-            erreurs.append("Employe inexistant")
-            return erreurs
-
-        projet = self._trouver_projet(project_id)
-        if projet is None:
-            erreurs.append("Projet inexistant")
-            return erreurs
-
-        max_heures = self.verifier_heures_max(emp)
-
-        if heures > max_heures:
-            erreurs.append(f"Depassement: {heures}h > {max_heures}h max pour {emp.type_contrat.value}")
-
-        if heures <= 0:
-            erreurs.append("Les heures doivent etre positives")
-
-        erreurs = self.valider_date(date, erreurs)
-
-        return erreurs
-
-    def verifier_heures_max(self, emp):
-        max_heures_par_contrat = {
-            TypeContrat.CDI: 8.0,
-            TypeContrat.CDD: 7.5,
-            TypeContrat.STAGE: 6.0,
-            TypeContrat.ALTERNANCE: 7.0,
-            TypeContrat.FREELANCE: 10.0,
-        }
-        max_heures = max_heures_par_contrat.get(emp.type_contrat, 8.0)
-        return max_heures
-
-    def valider_date(self, date, erreurs):
-        if self.config_format_date == "FR":
-            parties = date.split("/")
-            if len(parties) != 3:
-                erreurs.append("Format de date invalide (attendu: JJ/MM/AAAA)")
-        elif self.config_format_date == "US":
-            parties = date.split("/")
-            if len(parties) != 3:
-                erreurs.append("Format de date invalide (attendu: MM/DD/YYYY)")
-        elif self.config_format_date == "ISO":
-            parties = date.split("-")
-            if len(parties) != 3:
-                erreurs.append("Format de date invalide (attendu: AAAA-MM-JJ)")
-        
-        return erreurs
+        """Valide une entree de temps avant saisie (delegue a ValidationService)"""
+        return self.validation_service.valider_entree(
+            self._trouver_employe(employee_id),
+            self._trouver_projet(project_id),
+            date, heures
+        )
 
     def formater_date(self, date_str):
-        """Formate une date selon la configuration"""
-        if self.config_format_date == "FR":
-            parties = date_str.split("/")
-            if len(parties) == 3:
-                return f"{parties[0]}/{parties[1]}/{parties[2]}"
-        elif self.config_format_date == "US":
-            parties = date_str.split("/")
-            if len(parties) == 3:
-                return f"{parties[1]}/{parties[0]}/{parties[2]}"
-        elif self.config_format_date == "ISO":
-            parties = date_str.split("/")
-            if len(parties) == 3:
-                return f"{parties[2]}-{parties[1]}-{parties[0]}"
-        return date_str
+        """Formate une date (delegue a ValidationService)"""
+        return self.validation_service.formater_date(date_str)
 
     def exporter_csv(self, employee_id, mois, annee):
         """Exporte les entrees de temps au format CSV"""
@@ -251,3 +194,76 @@ class TimesheetService:
             if p.id == project_id:
                 return p
         return None
+
+class ValidationService:
+    """Service de validation des entrees de temps et formatage de dates"""
+
+    def __init__(self, config_format_date="FR"):
+        self.config_format_date = config_format_date
+
+    def valider_entree(self, emp, projet, date, heures):
+        """Valide une entree de temps avant saisie"""
+        erreurs = []
+
+        if emp is None:
+            erreurs.append("Employe inexistant")
+            return erreurs
+
+        if projet is None:
+            erreurs.append("Projet inexistant")
+            return erreurs
+
+        max_heures = self.verifier_heures_max(emp)
+
+        if heures > max_heures:
+            erreurs.append(f"Depassement: {heures}h > {max_heures}h max pour {emp.type_contrat.value}")
+
+        if heures <= 0:
+            erreurs.append("Les heures doivent etre positives")
+
+        erreurs = self.valider_date(date, erreurs)
+
+        return erreurs
+
+    def formater_date(self, date_str):
+        """Formate une date selon la configuration"""
+        if self.config_format_date == "FR":
+            parties = date_str.split("/")
+            if len(parties) == 3:
+                return f"{parties[0]}/{parties[1]}/{parties[2]}"
+        elif self.config_format_date == "US":
+            parties = date_str.split("/")
+            if len(parties) == 3:
+                return f"{parties[1]}/{parties[0]}/{parties[2]}"
+        elif self.config_format_date == "ISO":
+            parties = date_str.split("/")
+            if len(parties) == 3:
+                return f"{parties[2]}-{parties[1]}-{parties[0]}"
+        return date_str
+
+    def valider_date(self, date, erreurs):
+        if self.config_format_date == "FR":
+            parties = date.split("/")
+            if len(parties) != 3:
+                erreurs.append("Format de date invalide (attendu: JJ/MM/AAAA)")
+        elif self.config_format_date == "US":
+            parties = date.split("/")
+            if len(parties) != 3:
+                erreurs.append("Format de date invalide (attendu: MM/DD/YYYY)")
+        elif self.config_format_date == "ISO":
+            parties = date.split("-")
+            if len(parties) != 3:
+                erreurs.append("Format de date invalide (attendu: AAAA-MM-JJ)")
+        
+        return erreurs
+
+    def verifier_heures_max(self, emp):
+        max_heures_par_contrat = {
+            TypeContrat.CDI: 8.0,
+            TypeContrat.CDD: 7.5,
+            TypeContrat.STAGE: 6.0,
+            TypeContrat.ALTERNANCE: 7.0,
+            TypeContrat.FREELANCE: 10.0,
+        }
+        max_heures = max_heures_par_contrat.get(emp.type_contrat, 8.0)
+        return max_heures
