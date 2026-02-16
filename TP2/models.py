@@ -2,7 +2,6 @@
 
 from enum import Enum
 
-
 class TypeContrat(Enum):
     CDI = "CDI"
     CDD = "CDD"
@@ -51,17 +50,3 @@ class TimeEntry:
         self.heures = heures            # 8.0
         self.description = description
         self.statut = statut            # "brouillon", "soumis", "approuve", "rejete"
-
-
-class EmployeManager(Employee):
-    """Un manager qui peut approuver les feuilles de temps."""
-
-    def __init__(self, id, nom, prenom, telephone, email, date_embauche, type_contrat, taux_horaire, equipe):
-        super().__init__(id, nom, prenom, telephone, email, date_embauche, type_contrat, taux_horaire)
-        self.equipe = equipe
-
-    def approuver_entree(self, entree):
-        entree.statut = StatutEntree.APPROUVE
-
-    def rejeter_entree(self, entree, raison):
-        entree.statut = StatutEntree.REJETE

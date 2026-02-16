@@ -156,32 +156,6 @@ class TimesheetService:
             entrees, emp, self._trouver_projet, self.formater_date
         )
 
-    def envoyer_notification(self, employee_id, message):
-        """Envoie une notification a un employe"""
-        emp = self._trouver_employe(employee_id)
-        if emp:
-            notification = f"[{emp.nom}] {message}"
-            self.notifications.append(notification)
-            print(notification)
-
-    def calculer_statistiques(self, mois, annee):
-        """Calcule des statistiques globales"""
-        total_heures = 0
-        nb_entrees = 0
-        for entree in self.entrees:
-            parties = entree.date.split("/")
-            entry_mois = int(parties[1])
-            entry_annee = int(parties[2])
-            if entry_mois == mois and entry_annee == annee:
-                total_heures += entree.heures
-                nb_entrees += 1
-        moyenne = total_heures / nb_entrees if nb_entrees > 0 else 0
-        return {
-            "total_heures": total_heures,
-            "nb_entrees": nb_entrees,
-            "moyenne_heures": moyenne
-        }
-
     def _trouver_employe(self, employee_id):
         for emp in self.employees:
             if emp.id == employee_id:

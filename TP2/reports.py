@@ -1,33 +1,5 @@
 # reports.py - Generation de rapports et statistiques
 
-
-class RapportService:
-    """Service de rapports - interface pour la generation de rapports"""
-
-    def __init__(self, timesheet_service):
-        self.timesheet_service = timesheet_service
-
-    def rapport_mensuel(self, employee_id, mois, annee):
-        return self.timesheet_service.generer_rapport_mensuel(employee_id, mois, annee)
-
-    def heures_employe(self, employee_id, mois, annee):
-        return self.timesheet_service.calculer_heures_employe(employee_id, mois, annee)
-
-    def cout_projet(self, project_id, mois, annee):
-        return self.timesheet_service.calculer_cout_projet(project_id, mois, annee)
-
-    def export_csv(self, employee_id, mois, annee):
-        return self.timesheet_service.exporter_csv(employee_id, mois, annee)
-
-    def statistiques(self, mois, annee):
-        return self.timesheet_service.calculer_statistiques(mois, annee)
-
-    def nom_employe(self, employee_id):
-        """Retourne le nom d'un employe par son id"""
-        emp = self.timesheet_service._trouver_employe(employee_id)
-        return emp.nom if emp else None
-
-
 class FormateurRapport:
     """Formateur de lignes de rapport"""
 

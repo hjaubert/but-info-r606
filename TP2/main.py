@@ -1,10 +1,9 @@
 # main.py - Point d'entree de l'application de feuilles de temps
 
-from models import Employee, Projet, TimeEntry, EmployeManager, TypeContrat
+from models import Employee, TypeContrat
 from services import TimesheetService
 from reports import FormateurRapport
 from notifications import NotificationService, ApprobationWorkflow
-from utils import aujourd_hui
 
 
 def main():
