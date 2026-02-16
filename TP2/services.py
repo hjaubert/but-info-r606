@@ -2,6 +2,13 @@
 
 from models import Employee, TimeEntry, Projet, TypeContrat, StatutEntree
 
+class Config:
+    """Configuration centralisee de l'application"""
+
+    def __init__(self, format_date="FR", separateur_csv=";", devise="EUR"):
+        self.format_date = format_date
+        self.separateur_csv = separateur_csv
+        self.devise = devise
 
 class TimesheetService:
     """Service de gestion des feuilles de temps.
@@ -14,9 +21,9 @@ class TimesheetService:
         self.entrees = []
         self.notifications = []
         self.log = []
-        self.config_devise = "EUR"
-        self.validation_service = ValidationService()
-        self.export_service = ExportService()
+        self.config = Config()
+        self.validation_service = ValidationService(self.config)
+        self.export_service = ExportService(self.config)
 
     def ajouter_employe(self, employe):
         """Ajoute un employe au systeme"""
@@ -190,8 +197,8 @@ class TimesheetService:
 class ValidationService:
     """Service de validation des entrees de temps et formatage de dates"""
 
-    def __init__(self, config_format_date="FR"):
-        self.config_format_date = config_format_date
+    def __init__(self, config):
+        self.config = config
 
     def valider_entree(self, emp, projet, date, heures):
         """Valide une entree de temps avant saisie"""
@@ -219,34 +226,34 @@ class ValidationService:
 
     def formater_date(self, date_str):
         """Formate une date selon la configuration"""
-        if self.config_format_date == "FR":
+        if self.config.format_date == "FR":
             parties = date_str.split("/")
             if len(parties) == 3:
                 return f"{parties[0]}/{parties[1]}/{parties[2]}"
-        elif self.config_format_date == "US":
+        elif self.config.format_date == "US":
             parties = date_str.split("/")
             if len(parties) == 3:
                 return f"{parties[1]}/{parties[0]}/{parties[2]}"
-        elif self.config_format_date == "ISO":
+        elif self.config.format_date == "ISO":
             parties = date_str.split("/")
             if len(parties) == 3:
                 return f"{parties[2]}-{parties[1]}-{parties[0]}"
         return date_str
 
     def valider_date(self, date, erreurs):
-        if self.config_format_date == "FR":
+        if self.config.format_date == "FR":
             parties = date.split("/")
             if len(parties) != 3:
                 erreurs.append("Format de date invalide (attendu: JJ/MM/AAAA)")
-        elif self.config_format_date == "US":
+        elif self.config.format_date == "US":
             parties = date.split("/")
             if len(parties) != 3:
                 erreurs.append("Format de date invalide (attendu: MM/DD/YYYY)")
-        elif self.config_format_date == "ISO":
+        elif self.config.format_date == "ISO":
             parties = date.split("-")
             if len(parties) != 3:
                 erreurs.append("Format de date invalide (attendu: AAAA-MM-JJ)")
-        
+
         return erreurs
 
     def verifier_heures_max(self, emp):
@@ -263,12 +270,12 @@ class ValidationService:
 class ExportService:
     """Service d'export des donnees au format CSV"""
 
-    def __init__(self, separateur=";"):
-        self.separateur = separateur
+    def __init__(self, config):
+        self.config = config
 
     def exporter_csv(self, entrees, emp, trouver_projet_fn, formater_date_fn):
         """Exporte les entrees de temps au format CSV"""
-        sep = self.separateur
+        sep = self.config.separateur_csv
         lignes = [f"Date{sep}Projet{sep}Heures{sep}Description{sep}Cout (EUR)"]
 
         for entree in entrees:
