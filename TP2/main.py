@@ -2,7 +2,7 @@
 
 from models import Employee, Projet, TimeEntry, EmployeManager, TypeContrat
 from services import TimesheetService
-from reports import RapportService, FormateurRapport
+from reports import FormateurRapport
 from notifications import NotificationService, ApprobationWorkflow
 from utils import aujourd_hui
 
@@ -43,11 +43,11 @@ def main():
     print(ts.exporter_csv(1, 3, 2024))
 
     # Utilisation du service de rapports
-    rapport_service = RapportService(ts)
-    nom = rapport_service.nom_employe(1)
+    # Utilisation directe du service (suppression du Middle Man)
+    nom = ts._trouver_employe(1).nom
     print(f"\nRapport via RapportService pour: {nom}")
-    print(f"Heures totales: {rapport_service.heures_employe(1, 3, 2024):.1f}h")
-    print(f"Cout projet WEB01: {rapport_service.cout_projet(1, 3, 2024):.2f} EUR")
+    print(f"Heures totales: {ts.calculer_heures_employe(1, 3, 2024):.1f}h")
+    print(f"Cout projet WEB01: {ts.calculer_cout_projet(1, 3, 2024):.2f} EUR")
 
     # Workflow d'approbation
     ns = NotificationService()
