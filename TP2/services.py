@@ -14,9 +14,9 @@ class TimesheetService:
         self.entrees = []
         self.notifications = []
         self.log = []
-        self.config_separateur_csv = ";"
         self.config_devise = "EUR"
         self.validation_service = ValidationService()
+        self.export_service = ExportService()
 
     def ajouter_employe(self, employe):
         """Ajoute un employe au systeme"""
@@ -142,20 +142,12 @@ class TimesheetService:
         return self.validation_service.formater_date(date_str)
 
     def exporter_csv(self, employee_id, mois, annee):
-        """Exporte les entrees de temps au format CSV"""
-        sep = self.config_separateur_csv
-        lignes = [f"Date{sep}Projet{sep}Heures{sep}Description{sep}Cout (EUR)"]
-
+        """Exporte les entrees de temps au format CSV (delegue a ExportService)"""
         entrees = self._filtrer_entrees_mois(employee_id, mois, annee)
-        for entree in entrees:
-            projet = self._trouver_projet(entree.project_id)
-            projet_nom = projet.nom if projet else "Inconnu"
-            emp = self._trouver_employe(employee_id)
-            cout = entree.heures * emp.taux_horaire
-            date_formatee = self.formater_date(entree.date)
-            lignes.append(f"{date_formatee}{sep}{projet_nom}{sep}{entree.heures}{sep}{entree.description}{sep}{cout:.2f} EUR")
-
-        return "\n".join(lignes)
+        emp = self._trouver_employe(employee_id)
+        return self.export_service.exporter_csv(
+            entrees, emp, self._trouver_projet, self.formater_date
+        )
 
     def envoyer_notification(self, employee_id, message):
         """Envoie une notification a un employe"""
@@ -267,3 +259,23 @@ class ValidationService:
         }
         max_heures = max_heures_par_contrat.get(emp.type_contrat, 8.0)
         return max_heures
+
+class ExportService:
+    """Service d'export des donnees au format CSV"""
+
+    def __init__(self, separateur=";"):
+        self.separateur = separateur
+
+    def exporter_csv(self, entrees, emp, trouver_projet_fn, formater_date_fn):
+        """Exporte les entrees de temps au format CSV"""
+        sep = self.separateur
+        lignes = [f"Date{sep}Projet{sep}Heures{sep}Description{sep}Cout (EUR)"]
+
+        for entree in entrees:
+            projet = trouver_projet_fn(entree.project_id)
+            projet_nom = projet.nom if projet else "Inconnu"
+            cout = entree.heures * emp.taux_horaire
+            date_formatee = formater_date_fn(entree.date)
+            lignes.append(f"{date_formatee}{sep}{projet_nom}{sep}{entree.heures}{sep}{entree.description}{sep}{cout:.2f} EUR")
+
+        return "\n".join(lignes)
