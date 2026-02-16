@@ -22,6 +22,11 @@ class RapportService:
     def statistiques(self, mois, annee):
         return self.timesheet_service.calculer_statistiques(mois, annee)
 
+    def nom_employe(self, employee_id):
+        """Retourne le nom d'un employe par son id"""
+        emp = self.timesheet_service._trouver_employe(employee_id)
+        return emp.nom if emp else None
+
 
 class FormateurRapport:
     """Formateur de lignes de rapport"""
